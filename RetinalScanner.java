@@ -42,14 +42,19 @@ public class RetinalScanner {
 
         //Apply sharpness
         //Creating an empty matrix
-        Mat sharpened = new Mat(matrix1.rows(), matrix1.cols(), matrix1.type());
-        Imgproc.GaussianBlur(matrix1, sharpened, new Size(0,0), 10);
-        Core.addWeighted(matrix1, 1.5, sharpened, -0.5, 0, sharpened);
+        Mat sharpened1 = new Mat(matrix1.rows(), matrix1.cols(), matrix1.type());
+        Imgproc.GaussianBlur(matrix1, sharpened1, new Size(0,0), 10);
+        Core.addWeighted(matrix1, 1.5, sharpened1, -0.5, 0, sharpened1);
+        //do same for second image
+        Mat sharpened2 = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
+        Imgproc.GaussianBlur(matrix2, sharpened2, new Size(0,0), 10);
+        Core.addWeighted(matrix2, 1.5, sharpened2, -0.5, 0, sharpened2);
+
 
 
         //display the images
-        imshow(sharpened);
-        imshow(matrix2);
+        imshow(sharpened1);
+        imshow(sharpened2);
 
 
         //once imshow is terminated, program terminates (for now).

@@ -1,5 +1,6 @@
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -33,14 +34,21 @@ public class RetinalScanner {
         matrix2 = new Mat(matrix2, rectCrop);
 
         /*Image Processing */
-        //Apply contrast
-        matrix1.convertTo(matrix1, -1, 2, 5);
-        matrix2.convertTo(matrix2, -1, 2, 5);
+        //Apply contrast | brightness
+        matrix1.convertTo(matrix1, -1, 2, 0);
+        matrix2.convertTo(matrix2, -1, 2, 0);
+        matrix1.convertTo(matrix1, -1, 1, 20);
+        matrix2.convertTo(matrix2, -1, 1, 20);
 
+        //Apply sharpness
+        //Creating an empty matrix
+        Mat sharpened = new Mat(matrix1.rows(), matrix1.cols(), matrix1.type());
+        Imgproc.GaussianBlur(matrix1, sharpened, new Size(0,0), 10);
+        Core.addWeighted(matrix1, 1.5, sharpened, -0.5, 0, sharpened);
 
 
         //display the images
-        imshow(matrix1);
+        imshow(sharpened);
         imshow(matrix2);
 
 

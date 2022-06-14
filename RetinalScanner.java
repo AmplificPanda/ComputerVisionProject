@@ -8,6 +8,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+
 public class RetinalScanner {
     //Compulsory for OpenCV | OpenCV Core Library
     static {System.loadLibrary(Core.NATIVE_LIBRARY_NAME);}
@@ -35,10 +37,10 @@ public class RetinalScanner {
 
         /*Image Processing */
         //Apply contrast | brightness
-        matrix1.convertTo(matrix1, -1, 2, 0);
-        matrix2.convertTo(matrix2, -1, 2, 0);
-        matrix1.convertTo(matrix1, -1, 1, 20);
-        matrix2.convertTo(matrix2, -1, 1, 20);
+        matrix1.convertTo(matrix1, -1, 2.1, 0);
+        matrix2.convertTo(matrix2, -1, 2.1, 0);
+        matrix1.convertTo(matrix1, -1, 1, 5);
+        matrix2.convertTo(matrix2, -1, 1, 5);
 
         //Apply sharpness
         //Creating an empty matrix
@@ -50,11 +52,39 @@ public class RetinalScanner {
         Imgproc.GaussianBlur(matrix2, sharpened2, new Size(0,0), 10);
         Core.addWeighted(matrix2, 1.5, sharpened2, -0.5, 0, sharpened2);
 
+        //Reduce noise
+        Imgproc.GaussianBlur(sharpened1, sharpened1,
+                new Size(0, 0), 1.25);
+        Core.addWeighted(sharpened1, 1.5, sharpened1, -0.5,
+                0, sharpened1);
+        Imgproc.GaussianBlur(sharpened2, sharpened2,
+                new Size(0, 0), 1.25);
+        Core.addWeighted(sharpened2, 1.5, sharpened2, -0.5,
+                0, sharpened2);
+
+        //segmentation || Thresholding
+        //First: Source must be gray scale image
+        //Held as grayscale image here
+        Imgproc.cvtColor(sharpened1, sharpened1, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.cvtColor(sharpened2, sharpened2, Imgproc.COLOR_RGB2GRAY);
+
+
+        //apply morphology:
+        //Creating destination matrix
+        Mat morphedImage1 = new Mat(sharpened1.rows(), sharpened1.cols(), sharpened1.type());
+        Mat morphedImage2 = new Mat(sharpened2.rows(), sharpened2.cols(), sharpened2.type());
+        //Preparing the kernel matrix object
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size((2*2) + 1, (2*2)+1));
+
+        //Applying dilate on the Images
+        Imgproc.dilate(sharpened1, morphedImage1, kernel);
+        Imgproc.dilate(sharpened2, morphedImage2, kernel);
+
 
 
         //display the images
-        imshow(sharpened1);
-        imshow(sharpened2);
+        imshow(morphedImage1);
+        imshow(morphedImage2);
 
 
         //once imshow is terminated, program terminates (for now).

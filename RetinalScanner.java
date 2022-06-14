@@ -31,9 +31,9 @@ public class RetinalScanner {
         Mat matrix2 = Imgcodecs.imread(img2);
 
         //crop images [To Remove black area]
-        Rect rectCrop = new Rect(190, 50, 1053, 920);
-        matrix1 = new Mat(matrix1, rectCrop);
-        matrix2 = new Mat(matrix2, rectCrop);
+        //Rect rectCrop = new Rect(190, 50, 1053, 920);
+        //matrix1 = new Mat(matrix1, rectCrop);
+        //matrix2 = new Mat(matrix2, rectCrop);
 
         /*Image Processing */
         //Apply contrast | brightness
@@ -81,10 +81,11 @@ public class RetinalScanner {
         Imgproc.dilate(sharpened2, morphedImage2, kernel);
 
         Mat divisionResult1 = new Mat();
-        Core.divide(sharpened1, morphedImage1,divisionResult1);
+        Core.divide(sharpened1,morphedImage1 ,divisionResult1,255);
 
         //display the images
         imshow(divisionResult1);
+        imshow(morphedImage1);
         imshow(morphedImage2);
 
 

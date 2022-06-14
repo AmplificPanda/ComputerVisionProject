@@ -27,10 +27,15 @@ public class RetinalScanner {
         Mat matrix1 = Imgcodecs.imread(img1);
         Mat matrix2 = Imgcodecs.imread(img2);
 
-        //crop images
+        //crop images [To Remove black area]
         Rect rectCrop = new Rect(190, 50, 1053, 920);
         matrix1 = new Mat(matrix1, rectCrop);
         matrix2 = new Mat(matrix2, rectCrop);
+
+        /*Image Processing */
+        //Apply contrast
+        matrix1.convertTo(matrix1, -1, 2, 5);
+        matrix2.convertTo(matrix2, -1, 2, 5);
 
 
 
@@ -38,11 +43,15 @@ public class RetinalScanner {
         imshow(matrix1);
         imshow(matrix2);
 
-        System.out.println("Images Loaded");
+
+        //once imshow is terminated, program terminates (for now).
+        System.out.println("Program Exited");
+
+
 
     }
 
-    public static void imshow(Mat src){
+    public static void imshow(Mat src){ //displays images
         BufferedImage bufImage;
         try {
             MatOfByte matOfByte = new MatOfByte();
@@ -54,7 +63,7 @@ public class RetinalScanner {
             JFrame frame = new JFrame("Retinal Scan");
             frame.getContentPane().setLayout(new FlowLayout());
             frame.getContentPane().add(new JLabel(new ImageIcon(bufImage)));
-            //frame.setPreferredSize(new Dimension(400, 300));
+            frame.setSize(new Dimension(400, 300));
             frame.pack();
             frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

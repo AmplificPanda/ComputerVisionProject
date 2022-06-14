@@ -87,8 +87,8 @@ public class RetinalScanner {
         //divide grayscale image and the morphed dilated image
         Mat divisionResult1 = new Mat();
         Mat divisionResult2 = new Mat();
-        Core.divide(sharpened1,morphedImage1 ,divisionResult1,255);
-        Core.divide(sharpened2,morphedImage2,divisionResult2,255);
+        Core.divide(sharpened1,morphedImage1 ,divisionResult1,200);
+        Core.divide(sharpened2,morphedImage2,divisionResult2,200);
 
         //display the images
         imshow(divisionResult1);

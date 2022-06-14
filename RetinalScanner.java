@@ -80,10 +80,11 @@ public class RetinalScanner {
         Imgproc.dilate(sharpened1, morphedImage1, kernel);
         Imgproc.dilate(sharpened2, morphedImage2, kernel);
 
-
+        Mat divisionResult1 = new Mat();
+        Core.divide(sharpened1, morphedImage1,divisionResult1);
 
         //display the images
-        imshow(morphedImage1);
+        imshow(divisionResult1);
         imshow(morphedImage2);
 
 

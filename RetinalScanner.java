@@ -37,10 +37,10 @@ public class RetinalScanner {
 
         /*Image Processing */
         //Apply contrast | brightness
-        matrix1.convertTo(matrix1, -1, 2.1, 0);
-        matrix2.convertTo(matrix2, -1, 2.1, 0);
-        matrix1.convertTo(matrix1, -1, 1, 5);
-        matrix2.convertTo(matrix2, -1, 1, 5);
+        matrix1.convertTo(matrix1, -1, 1.1, 0);
+        matrix2.convertTo(matrix2, -1, 1.1, 0);
+        matrix1.convertTo(matrix1, -1, 1, 3);
+        matrix2.convertTo(matrix2, -1, 1, 3);
 
         //Apply sharpness
         //Creating an empty matrix
@@ -62,6 +62,10 @@ public class RetinalScanner {
         Core.addWeighted(sharpened2, 1.5, sharpened2, -0.5,
                 0, sharpened2);
 
+        //display images prior grayscale manipulation
+        imshow(sharpened1);
+        imshow(sharpened2);
+
         //segmentation || Thresholding
         //First: Source must be gray scale image
         //Held as grayscale image here
@@ -80,13 +84,15 @@ public class RetinalScanner {
         Imgproc.dilate(sharpened1, morphedImage1, kernel);
         Imgproc.dilate(sharpened2, morphedImage2, kernel);
 
+        //divide grayscale image and the morphed dilated image
         Mat divisionResult1 = new Mat();
+        Mat divisionResult2 = new Mat();
         Core.divide(sharpened1,morphedImage1 ,divisionResult1,255);
+        Core.divide(sharpened2,morphedImage2,divisionResult2,255);
 
         //display the images
         imshow(divisionResult1);
-        imshow(morphedImage1);
-        imshow(morphedImage2);
+        imshow(divisionResult2);
 
 
         //once imshow is terminated, program terminates (for now).

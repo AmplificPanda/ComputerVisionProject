@@ -5,7 +5,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.*;
 
 public class RetinalScanner {
@@ -24,13 +23,18 @@ public class RetinalScanner {
             img2 = args[1];
         }
 
-        //Instantiating the Imgcodecs class
-        Imgcodecs imageCodecs = new Imgcodecs();
-
         //Reading the Image from the file
         Mat matrix1 = Imgcodecs.imread(img1);
         Mat matrix2 = Imgcodecs.imread(img2);
 
+        //crop images
+        Rect rectCrop = new Rect(190, 50, 1053, 920);
+        matrix1 = new Mat(matrix1, rectCrop);
+        matrix2 = new Mat(matrix2, rectCrop);
+
+
+
+        //display the images
         imshow(matrix1);
         imshow(matrix2);
 
@@ -39,7 +43,7 @@ public class RetinalScanner {
     }
 
     public static void imshow(Mat src){
-        BufferedImage bufImage = null;
+        BufferedImage bufImage;
         try {
             MatOfByte matOfByte = new MatOfByte();
             Imgcodecs.imencode(".jpg", src, matOfByte);
@@ -47,7 +51,7 @@ public class RetinalScanner {
             InputStream in = new ByteArrayInputStream(byteArray);
             bufImage = ImageIO.read(in);
 
-            JFrame frame = new JFrame("Image");
+            JFrame frame = new JFrame("Retinal Scan");
             frame.getContentPane().setLayout(new FlowLayout());
             frame.getContentPane().add(new JLabel(new ImageIcon(bufImage)));
             //frame.setPreferredSize(new Dimension(400, 300));

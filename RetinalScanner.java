@@ -72,14 +72,14 @@ public class RetinalScanner {
         imshow(destImage);
 
         //Reduce noise
-//        Imgproc.GaussianBlur(sharpened1, sharpened1,
-//                new Size(0, 0), 1.25);
-//        Core.addWeighted(sharpened1, 1.5, sharpened1, -0.5,
-//                0, sharpened1);
-//        Imgproc.GaussianBlur(sharpened2, sharpened2,
-//                new Size(0, 0), 1.25);
-//        Core.addWeighted(sharpened2, 1.5, sharpened2, -0.5,
-//                0, sharpened2);
+        Imgproc.GaussianBlur(sharpened1, sharpened1,
+                new Size(0, 0), 1.25);
+        Core.addWeighted(sharpened1, 1.5, sharpened1, -0.5,
+                0, sharpened1);
+        Imgproc.GaussianBlur(sharpened2, sharpened2,
+                new Size(0, 0), 1.25);
+        Core.addWeighted(sharpened2, 1.5, sharpened2, -0.5,
+                0, sharpened2);
 
         //display images prior grayscale manipulation
         imshow(sharpened1);

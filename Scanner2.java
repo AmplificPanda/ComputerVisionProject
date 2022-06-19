@@ -64,23 +64,22 @@ public class Scanner2 {
         clahe.apply(channels1.get(1), matrix2);
         //clahe.apply(channels2.get(1), image2);
 
-        //[CONTRAST + SHARPENING]
-        //grayscale [required for adaptive threshold] [not required when using CLAHE]
-        //Imgproc.cvtColor(matrix2,matrix2,Imgproc.COLOR_RGB2GRAY,);
-
         //contrast
         //matrix1.convertTo(matrix1, -1, 1.3, 0);
-        matrix2.convertTo(matrix2, -1, 1.4, 0);
+        matrix2.convertTo(matrix2, -1, 1.6, 0);
         //matrix1.convertTo(matrix1, -1, 1, -40);
-        matrix2.convertTo(matrix2, -1, 1, -40);
+        matrix2.convertTo(matrix2, -1, 1, -25);
 
         Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
 
+        imshow(matrix2);
+
         //thresholding
-        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 59, 11);
+        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 61, 13);
+        imshow(dst);
 
         //apply median blur
-        Imgproc.medianBlur(dst, dst, 13); //higher values = less of image, lower = more of image
+        Imgproc.medianBlur(dst, dst, 17); //higher values = less of image, lower = more of image
 
         //invert
         Mat inverter= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));

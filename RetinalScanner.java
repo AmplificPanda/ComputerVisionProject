@@ -1,4 +1,5 @@
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
@@ -6,11 +7,17 @@ import org.opencv.imgproc.Imgproc;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.LinkedList;
+import org.opencv.core.*;
 
-import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+
+import static org.opencv.core.Core.inRange;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2HSV;
+import static org.opencv.imgproc.Imgproc.contourArea;
+
 
 public class RetinalScanner {
     //Compulsory for OpenCV | OpenCV Core Library
@@ -28,96 +35,91 @@ public class RetinalScanner {
             img2 = args[1];
         }
 
+        //[READ, CROP, RESIZE & COLOR SPACE CHANGES]
         //Reading the Image from the file
-        Mat matrix1 = Imgcodecs.imread(img1);
+        //Mat matrix1 = Imgcodecs.imread(img1);
         Mat matrix2 = Imgcodecs.imread(img2);
 
-        //crop images [To Remove black area]
-        Rect rectCrop = new Rect(190, 50, 1080, 920);
+        //Rect rectCrop = new Rect(180, 40, 1100, 950);
         //matrix1 = new Mat(matrix1, rectCrop);
-        matrix2 = new Mat(matrix2, rectCrop);
+        //matrix2 = new Mat(matrix2, rectCrop);
 
-        //resize image
-        // Scaling the Image using Resize function
-        Imgproc.resize(matrix1, matrix1, new Size(0, 0), 0.8, 0.8,
-                Imgproc.INTER_AREA);
+        //resize
+        //Imgproc.resize(matrix1, matrix1, new Size(0, 0), 0.8, 0.8,
+        //Imgproc.INTER_AREA);
         Imgproc.resize(matrix2, matrix2, new Size(0, 0), 0.8, 0.8,
                 Imgproc.INTER_AREA);
 
-        /*Image Processing */
-        //Apply contrast | brightness
-        matrix1.convertTo(matrix1, -1, 1.3, 0);
-        matrix2.convertTo(matrix2, -1, 1.3, 0);
-        matrix1.convertTo(matrix1, -1, 1, -40);
-        matrix2.convertTo(matrix2, -1, 1, -40);
+        //color space change
+        //Imgproc.cvtColor(initialInput2, initialInput2, Imgproc.COLOR_BGR2RGB);
+        Imgproc.cvtColor(matrix2, matrix2, Imgproc.COLOR_BGR2RGB);
 
-        //Apply sharpness
-        //Creating an empty matrix
-        Mat sharpened1 = new Mat(matrix1.rows(), matrix1.cols(), matrix1.type());
-        Imgproc.GaussianBlur(matrix1, sharpened1, new Size(0,0), 6);
-        Core.addWeighted(matrix1, 1.5, sharpened1, -0.5, 0, sharpened1);
-        //do same for second image
-        Mat sharpened2 = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
-        Imgproc.GaussianBlur(matrix2, sharpened2, new Size(0,0), 6);
-        Core.addWeighted(matrix2, 1.5, sharpened2, -0.5, 0, sharpened2);
+        ArrayList<Mat> channels1 = new ArrayList<>(3);
+        Core.split(matrix2, channels1);
+        //ArrayList<Mat> channels2 = new ArrayList<>(3);
+        //Core.split(image2, channels2);
 
-        //CLAHE | Adpative histogram equalization
-        LinkedList<Mat> channels = new LinkedList();
-        Core.split(matrix2, channels);
-        CLAHE clahe = Imgproc.createCLAHE();
-        Mat destImage = new Mat(matrix2.cols(),matrix2.rows(), CvType.CV_8UC1);
-        clahe.apply(channels.get(0), destImage);
-        Core.merge(channels, matrix2);
+        //CLAHE for green channel
+        CLAHE clahe = Imgproc.createCLAHE(3, new Size(8, 8));
+        clahe.apply(channels1.get(1), matrix2);
+        //clahe.apply(channels2.get(1), image2);
 
-        imshow(destImage);
+        //[CONTRAST + SHARPENING]
+        //grayscale [required for adaptive threshold] [not required when using CLAHE]
+        //Imgproc.cvtColor(matrix2,matrix2,Imgproc.COLOR_RGB2GRAY);
 
-        //Reduce noise
-        Imgproc.GaussianBlur(sharpened1, sharpened1,
-                new Size(0, 0), 1.25);
-        Core.addWeighted(sharpened1, 1.5, sharpened1, -0.5,
-                0, sharpened1);
-        Imgproc.GaussianBlur(sharpened2, sharpened2,
-                new Size(0, 0), 1.25);
-        Core.addWeighted(sharpened2, 1.5, sharpened2, -0.5,
-                0, sharpened2);
+        //contrast
+        //matrix1.convertTo(matrix1, -1, 1.3, 0);
+        matrix2.convertTo(matrix2, -1, 1.5, 0);
+        //matrix1.convertTo(matrix1, -1, 1, -40);
+        matrix2.convertTo(matrix2, -1, 1, -35);
 
-        //display images prior grayscale manipulation
-        imshow(sharpened1);
-        imshow(sharpened2);
+        Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
 
-        //segmentation || Thresholding
-        //First: Source must be gray scale image
-        //Held as grayscale image here
-        Imgproc.cvtColor(sharpened1, sharpened1, Imgproc.COLOR_RGB2GRAY);
-        Imgproc.cvtColor(sharpened2, sharpened2, Imgproc.COLOR_RGB2GRAY);
+        //thresholding
+        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 69, 15);
+        imshow(dst);
+
+        //apply median blur
+        Imgproc.medianBlur(dst, dst, 13); //higher values = less of image, lower = more of image
+
+        //invert
+        Mat inverter= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
+        Core.subtract(inverter, dst, dst);
+
+        Mat invertedImage = dst; //keep the inverted image in this var
+        //up to applying CONTOURS HERE
+        imshow(invertedImage);
 
 
-        //apply morphology:
-        //Creating destination matrix
-        Mat morphedImage1 = new Mat(sharpened1.rows(), sharpened1.cols(), sharpened1.type());
-        Mat morphedImage2 = new Mat(sharpened2.rows(), sharpened2.cols(), sharpened2.type());
-        //Preparing the kernel matrix object
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size((2*2) + 1, (2*2)+1));
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Mat drawing = Mat.zeros(dst.size(), CvType.CV_8UC3);
 
-        //Applying dilate on the Images
-        Imgproc.dilate(sharpened1, morphedImage1, kernel);
-        Imgproc.dilate(sharpened2, morphedImage2, kernel);
+        for (int cIdx = 0; cIdx < contours.size(); cIdx++) {
+            double contourArea = Imgproc.contourArea(contours.get(cIdx));
+            Scalar color = new Scalar(255, 255, 255);
+            if ( 1 < contourArea  && contourArea < 400000) {
+                System.out.println(contourArea);
+                Imgproc.drawContours(drawing, contours, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+            }
+        }
+        imshow(drawing);
 
-        //divide grayscale image and the morphed dilated image
-        Mat divisionResult1 = new Mat();
-        Mat divisionResult2 = new Mat();
-        Core.divide(sharpened1,morphedImage1 ,divisionResult1,200);
-        Core.divide(sharpened2,morphedImage2,divisionResult2,200);
+        //grayscale image
+        Imgproc.cvtColor(drawing,drawing, Imgproc.COLOR_BGR2GRAY);
 
-        //display the images
-        imshow(divisionResult1);
-        imshow(divisionResult2);
+
+        Mat result1 = new Mat(dst.rows(),dst.cols(),dst.type());
+        //now mask with inverted image //inverter
+        Core.bitwise_and(drawing, invertedImage,result1);
+
+        imshow(result1);
 
 
         //once imshow is terminated, program terminates (for now).
         System.out.println("Program Exited");
-
-
 
     }
 
@@ -142,6 +144,4 @@ public class RetinalScanner {
         }
     }
 
-
 }
-

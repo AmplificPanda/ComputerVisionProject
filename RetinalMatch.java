@@ -40,8 +40,8 @@ public class RetinalMatch {
         Imgproc.resize(SecondInput, SecondInput, new Size(0, 0), 0.8, 0.8, Imgproc.INTER_AREA);
 
         //contrast and brightness
-        FirstInput.convertTo(FirstInput, -1, 1.6, -35);
-        SecondInput.convertTo(SecondInput, -1, 1.6, -35);
+        FirstInput.convertTo(FirstInput, -1, 1.6, -25);
+        SecondInput.convertTo(SecondInput, -1, 1.6, -25);
 
         //split channels
         ArrayList<Mat> channels1 = new ArrayList<>(3);
@@ -55,12 +55,12 @@ public class RetinalMatch {
         clahe.apply(channels2.get(1),SecondInput);
 
         //apply median blur
-        Imgproc.medianBlur(FirstInput, FirstInput, 11);
-        Imgproc.medianBlur(SecondInput, SecondInput, 11);
+        Imgproc.medianBlur(FirstInput, FirstInput, 17);
+        Imgproc.medianBlur(SecondInput, SecondInput, 17);
 
         //thresholding
-        Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 53, 13);
-        Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 53,  13);
+        Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 61, 11);
+        Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 61,  11);
 
         //apply erosion and dilation
         int kernelSize = 1;
@@ -80,6 +80,9 @@ public class RetinalMatch {
         Mat FirstInvert = FirstInput;
         Mat SecondInvert = SecondInput;
 
+        imshow(FirstInvert);
+        imshow(SecondInvert);
+
         //find contours
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         ArrayList<MatOfPoint> contoursTwo = new ArrayList<>();
@@ -95,9 +98,9 @@ public class RetinalMatch {
         for (int cIdx = 0; cIdx < contours.size(); cIdx++) {
             double contourArea = Imgproc.contourArea(contours.get(cIdx));
             Scalar color = new Scalar(255, 255, 255);
-            if ( 1 < contourArea  && contourArea < 400000) {
+            if ( 1 < contourArea  && contourArea < 200000) {
                 //System.out.println(contourArea);
-                Imgproc.drawContours(drawingOne, contours, cIdx, color, 30, Imgproc.LINE_8, hierarchy, 0, new Point());
+                Imgproc.drawContours(drawingOne, contours, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
             }
         }
 
@@ -105,9 +108,9 @@ public class RetinalMatch {
         for (int cIdx = 0; cIdx < contoursTwo.size(); cIdx++) {
             double contourArea = Imgproc.contourArea(contoursTwo.get(cIdx));
             Scalar color = new Scalar(255, 255, 255);
-            if ( 1 < contourArea  && contourArea < 400000) {
+            if ( 1 < contourArea  && contourArea < 200000) {
                 System.out.println(contourArea);
-                Imgproc.drawContours(drawingTwo, contoursTwo, cIdx, color, 30, Imgproc.LINE_8, hierarchy, 0, new Point());
+                Imgproc.drawContours(drawingTwo, contoursTwo, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
             }
         }
 

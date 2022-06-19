@@ -1,4 +1,5 @@
 import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
@@ -6,6 +7,8 @@ import org.opencv.imgproc.Imgproc;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import org.opencv.core.*;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -75,16 +78,28 @@ public class Scanner2 {
         Imgproc.medianBlur(dst, dst, 7); //higher values = less of image, lower = more of image
 
         //invert
-        Mat invertcolormatrix= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
+        Mat inverter= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
+        Core.subtract(inverter, dst, dst);
 
-        Core.subtract(invertcolormatrix, dst, dst);
         //up to applying CONTOURS HERE
+
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Mat drawing = Mat.zeros(dst.size(), CvType.CV_8UC3);
+        for (int i = 0; i < contours.size(); i++) {
+            Scalar color = new Scalar(255, 255, 255);
+            Imgproc.drawContours(drawing, contours, i, color, 8, Imgproc.LINE_8, hierarchy, 0, new Point());
+        }
+
+        //now mask with original inverter
 
 
 
         //imshow(matrix1);
         imshow(dst);
         imshow(matrix2);
+        imshow(drawing);
 
 
         //once imshow is terminated, program terminates (for now).
@@ -112,6 +127,8 @@ public class Scanner2 {
             e.printStackTrace();
         }
     }
+
+
 
 
 }

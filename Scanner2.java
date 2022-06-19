@@ -14,6 +14,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import static org.opencv.core.Core.inRange;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2HSV;
+
 
 public class Scanner2 {
     //Compulsory for OpenCV | OpenCV Core Library
@@ -81,7 +84,9 @@ public class Scanner2 {
         Mat inverter= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
         Core.subtract(inverter, dst, dst);
 
+        Mat invertedImage = dst; //keep the inverted image in this var
         //up to applying CONTOURS HERE
+        //imshow(invertedImage);
 
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -92,14 +97,33 @@ public class Scanner2 {
             Imgproc.drawContours(drawing, contours, i, color, 8, Imgproc.LINE_8, hierarchy, 0, new Point());
         }
 
-        //now mask with original inverter
 
+        //contour by area to erase big ring
+        double maxVal = -200;
+        int maxValIdx = -200;
+        for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++)
+        {
+            double contourArea = Imgproc.contourArea(contours.get(contourIdx));
+            if (maxVal < contourArea)
+            {
+                maxVal = contourArea;
+                maxValIdx = contourIdx;
+            }
+        }
 
+        Imgproc.drawContours(drawing, contours, maxValIdx, new Scalar(0,255,0), 5);
 
-        //imshow(matrix1);
-        imshow(dst);
-        imshow(matrix2);
         imshow(drawing);
+
+        //grayscale image
+        Imgproc.cvtColor(drawing,drawing, Imgproc.COLOR_BGR2GRAY);
+
+
+        Mat result1 = new Mat(dst.rows(),dst.cols(),dst.type());
+        //now mask with inverted image //inverter
+        Core.bitwise_and(drawing, invertedImage,result1);
+
+        imshow(result1);
 
 
         //once imshow is terminated, program terminates (for now).

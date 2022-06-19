@@ -54,24 +54,76 @@ public class RetinalMatch {
         CLAHE clahe = Imgproc.createCLAHE(3, new Size(8, 8));
         clahe.apply(channels1.get(1), FirstInput);
         clahe.apply(channels2.get(1),SecondInput);
+        imshow(FirstInput);
 
         //apply median blur
         Imgproc.medianBlur(FirstInput, FirstInput, 11);
-        //Imgproc.medianBlur(SecondInput, SecondInput, 11);
+        Imgproc.medianBlur(SecondInput, SecondInput, 11);
 
         //thresholding
-        Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 59, 13);
-        Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 59, 13);
-
-        //
-        int kernelSize = 3;
-        Mat element = getStructuringElement(CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1), new Point(kernelSize, kernelSize));
-
-        erode(FirstInput,FirstInput,element);
-        dilate(FirstInput,FirstInput,element);
+        Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 43, 13);
+        Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 43,  13);
 
         imshow(FirstInput);
-        imshow(SecondInput);
+
+        //apply erosion and dilation
+        int kernelSize = 1;
+        Mat element = getStructuringElement(CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1), new Point(kernelSize, kernelSize));
+        erode(FirstInput,FirstInput,element);
+        erode(SecondInput,SecondInput,element);
+        dilate(FirstInput,FirstInput,element);
+        dilate(SecondInput,SecondInput,element);
+
+        //invert image
+        Mat invertOne = new Mat(FirstInput.rows(),FirstInput.cols(), FirstInput.type(), new Scalar(255,255,255));
+        Mat invertTwo = new Mat(SecondInput.rows(),SecondInput.cols(), SecondInput.type(), new Scalar(255,255,255));
+        Core.subtract(invertOne, FirstInput, FirstInput);
+        Core.subtract(invertTwo,SecondInput,SecondInput);
+
+        //store the inverted images
+        Mat FirstInvert = FirstInput;
+        Mat SecondInvert = SecondInput;
+
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
+        ArrayList<MatOfPoint> contoursTwo = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(FirstInvert, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(SecondInvert, contoursTwo, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        Mat drawingOne = Mat.zeros(FirstInput.size(), CvType.CV_8UC3);
+        Mat drawingTwo = Mat.zeros(SecondInput.size(), CvType.CV_8UC3);
+
+        for (int cIdx = 0; cIdx < contours.size(); cIdx++) {
+            double contourArea = Imgproc.contourArea(contours.get(cIdx));
+            Scalar color = new Scalar(255, 255, 255);
+            if ( 1 < contourArea  && contourArea < 400000) {
+                //System.out.println(contourArea);
+                Imgproc.drawContours(drawingOne, contours, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+            }
+        }
+
+        for (int cIdx = 0; cIdx < contoursTwo.size(); cIdx++) {
+            double contourArea = Imgproc.contourArea(contoursTwo.get(cIdx));
+            Scalar color = new Scalar(255, 255, 255);
+            if ( 1 < contourArea  && contourArea < 400000) {
+                System.out.println(contourArea);
+                Imgproc.drawContours(drawingTwo, contoursTwo, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+            }
+        }
+
+        //grayscale to make size of input args the same
+        Imgproc.cvtColor(drawingOne,drawingOne, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(drawingTwo,drawingTwo, Imgproc.COLOR_BGR2GRAY);
+
+        Mat resultOne = new Mat(FirstInput.rows(),FirstInput.cols(),FirstInput.type());
+        Mat resultTwo = new Mat(SecondInput.rows(),SecondInput.cols(),SecondInput.type());
+
+        Core.bitwise_and(drawingOne, FirstInvert,resultOne);
+        Core.bitwise_and(drawingTwo, SecondInvert,resultTwo);
+
+        imshow(resultOne);
+        imshow(resultTwo);
+
     }
 
     public static void imshow(Mat src){ //displays images

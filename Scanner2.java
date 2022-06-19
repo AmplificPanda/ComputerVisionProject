@@ -72,11 +72,9 @@ public class Scanner2 {
 
         Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
 
-        imshow(matrix2);
-
         //thresholding
         Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 61, 13);
-        imshow(dst);
+        //imshow(dst);
 
         //apply median blur
         Imgproc.medianBlur(dst, dst, 17); //higher values = less of image, lower = more of image
@@ -87,7 +85,7 @@ public class Scanner2 {
 
         Mat invertedImage = dst; //keep the inverted image in this var
         //up to applying CONTOURS HERE
-        imshow(invertedImage);
+        //imshow(invertedImage);
 
 
         ArrayList<MatOfPoint> contours = new ArrayList<>();

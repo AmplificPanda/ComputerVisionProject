@@ -75,13 +75,12 @@ public class Scanner2 {
         matrix2.convertTo(matrix2, -1, 1, -40);
 
         Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
-        //thresholding
-        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 41, 7);
 
-        //imshow(dst);
+        //thresholding
+        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 39, 11);
 
         //apply median blur
-        Imgproc.medianBlur(dst, dst, 15); //higher values = less of image, lower = more of image
+        Imgproc.medianBlur(dst, dst, 13); //higher values = less of image, lower = more of image
 
         //invert
         Mat inverter= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
@@ -97,21 +96,13 @@ public class Scanner2 {
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         Mat drawing = Mat.zeros(dst.size(), CvType.CV_8UC3);
 
-        double maxVal = 0;
-        int maxValIdx = 0;
         for (int cIdx = 0; cIdx < contours.size(); cIdx++) {
             double contourArea = Imgproc.contourArea(contours.get(cIdx));
             Scalar color = new Scalar(255, 255, 255);
-            if (maxVal < contourArea) {
-
-                if ( 1 < contourArea  && contourArea < 100000) {
-
-                    maxVal = contourArea;
-                    maxValIdx = cIdx;
+                if ( 1 < contourArea  && contourArea < 400000) {
+                    System.out.println(contourArea);
                     Imgproc.drawContours(drawing, contours, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
                 }
-            }
-
         }
         imshow(drawing);
 

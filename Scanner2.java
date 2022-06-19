@@ -70,14 +70,14 @@ public class Scanner2 {
 
         //contrast
         //matrix1.convertTo(matrix1, -1, 1.3, 0);
-        matrix2.convertTo(matrix2, -1, 1.3, 0);
+        matrix2.convertTo(matrix2, -1, 1.4, 0);
         //matrix1.convertTo(matrix1, -1, 1, -40);
         matrix2.convertTo(matrix2, -1, 1, -40);
 
         Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
 
         //thresholding
-        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 39, 11);
+        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 59, 11);
 
         //apply median blur
         Imgproc.medianBlur(dst, dst, 13); //higher values = less of image, lower = more of image
@@ -142,9 +142,6 @@ public class Scanner2 {
             e.printStackTrace();
         }
     }
-
-
-
 
 }
 

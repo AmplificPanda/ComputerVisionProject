@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import static org.opencv.core.Core.inRange;
 import static org.opencv.imgproc.Imgproc.COLOR_BGR2HSV;
+import static org.opencv.imgproc.Imgproc.contourArea;
 
 
 public class Scanner2 {
@@ -39,9 +40,9 @@ public class Scanner2 {
         //Mat matrix1 = Imgcodecs.imread(img1);
         Mat matrix2 = Imgcodecs.imread(img2);
 
-        Rect rectCrop = new Rect(190, 50, 1080, 920);
+        //Rect rectCrop = new Rect(180, 40, 1100, 950);
         //matrix1 = new Mat(matrix1, rectCrop);
-        matrix2 = new Mat(matrix2, rectCrop);
+        //matrix2 = new Mat(matrix2, rectCrop);
 
         //resize
         //Imgproc.resize(matrix1, matrix1, new Size(0, 0), 0.8, 0.8,
@@ -75,10 +76,12 @@ public class Scanner2 {
 
         Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
         //thresholding
-        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 10);
+        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 51, 7);
+
+        //imshow(dst);
 
         //apply median blur
-        Imgproc.medianBlur(dst, dst, 7); //higher values = less of image, lower = more of image
+        Imgproc.medianBlur(dst, dst, 15); //higher values = less of image, lower = more of image
 
         //invert
         Mat inverter= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
@@ -86,7 +89,7 @@ public class Scanner2 {
 
         Mat invertedImage = dst; //keep the inverted image in this var
         //up to applying CONTOURS HERE
-        //imshow(invertedImage);
+        imshow(invertedImage);
 
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -99,21 +102,26 @@ public class Scanner2 {
 
 
         //contour by area to erase big ring
-        double maxVal = -200;
-        int maxValIdx = -200;
+        double maxVal = 0;
+        int maxValIdx = 0;
         for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++)
         {
             double contourArea = Imgproc.contourArea(contours.get(contourIdx));
             if (maxVal < contourArea)
             {
-                maxVal = contourArea;
-                maxValIdx = contourIdx;
+                if (contourArea < 1){
+                    System.out.println(contourArea);
+                    maxVal = contourArea;
+                    maxValIdx = contourIdx;
+                }
+
             }
         }
-
-        Imgproc.drawContours(drawing, contours, maxValIdx, new Scalar(0,255,0), 5);
-
         imshow(drawing);
+
+        Imgproc.drawContours(drawing, contours, maxValIdx, new Scalar(0,0,255), 5);
+
+        //imshow(drawing);
 
         //grayscale image
         Imgproc.cvtColor(drawing,drawing, Imgproc.COLOR_BGR2GRAY);

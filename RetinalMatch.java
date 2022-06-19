@@ -35,14 +35,13 @@ public class RetinalMatch {
         Mat FirstInput = Imgcodecs.imread(img1);
         Mat SecondInput = Imgcodecs.imread(img2);
 
-
         //resize images
         Imgproc.resize(FirstInput, FirstInput, new Size(0, 0), 0.8, 0.8, Imgproc.INTER_AREA);
         Imgproc.resize(SecondInput, SecondInput, new Size(0, 0), 0.8, 0.8, Imgproc.INTER_AREA);
 
         //contrast and brightness
-        FirstInput.convertTo(FirstInput, -1, 1.6, -15);
-        SecondInput.convertTo(SecondInput, -1, 1.6, -15);
+        FirstInput.convertTo(FirstInput, -1, 1.6, -35);
+        SecondInput.convertTo(SecondInput, -1, 1.6, -35);
 
         //split channels
         ArrayList<Mat> channels1 = new ArrayList<>(3);
@@ -61,8 +60,8 @@ public class RetinalMatch {
         Imgproc.medianBlur(SecondInput, SecondInput, 11);
 
         //thresholding
-        Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 43, 13);
-        Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 43,  13);
+        Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 53, 13);
+        Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 53,  13);
 
         imshow(FirstInput);
 
@@ -84,30 +83,34 @@ public class RetinalMatch {
         Mat FirstInvert = FirstInput;
         Mat SecondInvert = SecondInput;
 
+        //find contours
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         ArrayList<MatOfPoint> contoursTwo = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(FirstInvert, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         Imgproc.findContours(SecondInvert, contoursTwo, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
+        //for storing
         Mat drawingOne = Mat.zeros(FirstInput.size(), CvType.CV_8UC3);
         Mat drawingTwo = Mat.zeros(SecondInput.size(), CvType.CV_8UC3);
 
+        //filter by size
         for (int cIdx = 0; cIdx < contours.size(); cIdx++) {
             double contourArea = Imgproc.contourArea(contours.get(cIdx));
             Scalar color = new Scalar(255, 255, 255);
             if ( 1 < contourArea  && contourArea < 400000) {
                 //System.out.println(contourArea);
-                Imgproc.drawContours(drawingOne, contours, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+                Imgproc.drawContours(drawingOne, contours, cIdx, color, 30, Imgproc.LINE_8, hierarchy, 0, new Point());
             }
         }
 
+        //apply same for second image
         for (int cIdx = 0; cIdx < contoursTwo.size(); cIdx++) {
             double contourArea = Imgproc.contourArea(contoursTwo.get(cIdx));
             Scalar color = new Scalar(255, 255, 255);
             if ( 1 < contourArea  && contourArea < 400000) {
                 System.out.println(contourArea);
-                Imgproc.drawContours(drawingTwo, contoursTwo, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+                Imgproc.drawContours(drawingTwo, contoursTwo, cIdx, color, 30, Imgproc.LINE_8, hierarchy, 0, new Point());
             }
         }
 
@@ -115,9 +118,11 @@ public class RetinalMatch {
         Imgproc.cvtColor(drawingOne,drawingOne, Imgproc.COLOR_BGR2GRAY);
         Imgproc.cvtColor(drawingTwo,drawingTwo, Imgproc.COLOR_BGR2GRAY);
 
+        //store result
         Mat resultOne = new Mat(FirstInput.rows(),FirstInput.cols(),FirstInput.type());
         Mat resultTwo = new Mat(SecondInput.rows(),SecondInput.cols(),SecondInput.type());
 
+        //bitwise and to mask drawing and inverted image, with result.
         Core.bitwise_and(drawingOne, FirstInvert,resultOne);
         Core.bitwise_and(drawingTwo, SecondInvert,resultTwo);
 

@@ -74,6 +74,10 @@ public class Scanner2 {
         //apply median blur
         Imgproc.medianBlur(dst, dst, 7); //higher values = less of image, lower = more of image
 
+        //invert
+        Mat invertcolormatrix= new Mat(dst.rows(),dst.cols(), dst.type(), new Scalar(255,255,255));
+
+        Core.subtract(invertcolormatrix, dst, dst);
         //up to applying CONTOURS HERE
 
 

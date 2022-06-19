@@ -74,6 +74,7 @@ public class Scanner2 {
         //apply median blur
         Imgproc.medianBlur(dst, dst, 7); //higher values = less of image, lower = more of image
 
+        //up to applying CONTOURS HERE
 
 
 

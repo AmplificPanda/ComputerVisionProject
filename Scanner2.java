@@ -76,7 +76,7 @@ public class Scanner2 {
 
         Mat dst = new Mat(matrix2.rows(), matrix2.cols(), matrix2.type());
         //thresholding
-        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 51, 7);
+        Imgproc.adaptiveThreshold(matrix2, dst, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 41, 7);
 
         //imshow(dst);
 
@@ -97,9 +97,9 @@ public class Scanner2 {
         Mat drawing = Mat.zeros(dst.size(), CvType.CV_8UC3);
         for (int i = 0; i < contours.size(); i++) {
             Scalar color = new Scalar(255, 255, 255);
-            Imgproc.drawContours(drawing, contours, i, color, 8, Imgproc.LINE_8, hierarchy, 0, new Point());
+            Imgproc.drawContours(drawing, contours, i, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
         }
-
+        imshow(drawing);
 
         //contour by area to erase big ring
         double maxVal = 0;
@@ -109,7 +109,7 @@ public class Scanner2 {
             double contourArea = Imgproc.contourArea(contours.get(contourIdx));
             if (maxVal < contourArea)
             {
-                if (contourArea < 1){
+                if (contourArea < 90000){
                     System.out.println(contourArea);
                     maxVal = contourArea;
                     maxValIdx = contourIdx;

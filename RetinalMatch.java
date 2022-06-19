@@ -53,7 +53,6 @@ public class RetinalMatch {
         CLAHE clahe = Imgproc.createCLAHE(3, new Size(8, 8));
         clahe.apply(channels1.get(1), FirstInput);
         clahe.apply(channels2.get(1),SecondInput);
-        imshow(FirstInput);
 
         //apply median blur
         Imgproc.medianBlur(FirstInput, FirstInput, 11);
@@ -62,8 +61,6 @@ public class RetinalMatch {
         //thresholding
         Imgproc.adaptiveThreshold(FirstInput, FirstInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 53, 13);
         Imgproc.adaptiveThreshold(SecondInput, SecondInput, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 53,  13);
-
-        imshow(FirstInput);
 
         //apply erosion and dilation
         int kernelSize = 1;
@@ -126,6 +123,7 @@ public class RetinalMatch {
         Core.bitwise_and(drawingOne, FirstInvert,resultOne);
         Core.bitwise_and(drawingTwo, SecondInvert,resultTwo);
 
+        //output the result (temporary)
         imshow(resultOne);
         imshow(resultTwo);
 

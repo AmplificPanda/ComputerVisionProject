@@ -96,31 +96,24 @@ public class Scanner2 {
         Mat hierarchy = new Mat();
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         Mat drawing = Mat.zeros(dst.size(), CvType.CV_8UC3);
-        for (int i = 0; i < contours.size(); i++) {
-            Scalar color = new Scalar(255, 255, 255);
-          //  Imgproc.drawContours(drawing, contours, i, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
-        }
-        imshow(drawing);
-        //contour by area to erase big ring
+
         double maxVal = 0;
         int maxValIdx = 0;
-        for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++)
-        {
-            double contourArea = Imgproc.contourArea(contours.get(contourIdx));
-            if (maxVal < contourArea)
-            {
-                System.out.println(contourArea);
-                if (contourArea < 30000){
-                    maxVal = contourArea;
-                    maxValIdx = contourIdx;
-                }
+        for (int cIdx = 0; cIdx < contours.size(); cIdx++) {
+            double contourArea = Imgproc.contourArea(contours.get(cIdx));
+            Scalar color = new Scalar(255, 255, 255);
+            if (maxVal < contourArea) {
 
+                if ( 1 < contourArea  && contourArea < 100000) {
+
+                    maxVal = contourArea;
+                    maxValIdx = cIdx;
+                    Imgproc.drawContours(drawing, contours, cIdx, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+                }
             }
+
         }
         imshow(drawing);
-        Imgproc.drawContours(drawing, contours, maxValIdx, new Scalar(0,0,255), 5);
-
-        //imshow(drawing);
 
         //grayscale image
         Imgproc.cvtColor(drawing,drawing, Imgproc.COLOR_BGR2GRAY);

@@ -91,16 +91,16 @@ public class Scanner2 {
         //up to applying CONTOURS HERE
         imshow(invertedImage);
 
+
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         Mat drawing = Mat.zeros(dst.size(), CvType.CV_8UC3);
         for (int i = 0; i < contours.size(); i++) {
             Scalar color = new Scalar(255, 255, 255);
-            Imgproc.drawContours(drawing, contours, i, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
+          //  Imgproc.drawContours(drawing, contours, i, color, 20, Imgproc.LINE_8, hierarchy, 0, new Point());
         }
         imshow(drawing);
-
         //contour by area to erase big ring
         double maxVal = 0;
         int maxValIdx = 0;
@@ -109,8 +109,8 @@ public class Scanner2 {
             double contourArea = Imgproc.contourArea(contours.get(contourIdx));
             if (maxVal < contourArea)
             {
-                if (contourArea < 90000){
-                    System.out.println(contourArea);
+                System.out.println(contourArea);
+                if (contourArea < 30000){
                     maxVal = contourArea;
                     maxValIdx = contourIdx;
                 }
@@ -118,7 +118,6 @@ public class Scanner2 {
             }
         }
         imshow(drawing);
-
         Imgproc.drawContours(drawing, contours, maxValIdx, new Scalar(0,0,255), 5);
 
         //imshow(drawing);
